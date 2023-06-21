@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+        html,
+        body{
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            font-family: 'Helvetica', sans-serif;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+        .page-wrapper{
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1300px;
+            padding: 2rem;
+        }
+        .media-title h2 {
+            font-weight: 200;
+        }
+        .video-wrapper {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid #EEE;
+            border-radius: 10px;    
+        }
+        .video-wrapper span {
+    padding: 0.25rem;
+    text-align: center;
+    font-size: 0.9rem;
+}        
+        .video-clips {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.55rem;
+        }
+        .audio-clips {
+    max-height: 400px;
+    overflow: hidden;
+    overflow-y: auto;
+}
+        .audio-wrapper {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid #CCC;
+    padding: 0.25rem;
+    margin: 0.25rem 0;
+    border-radius: 0.5rem;
+}
+.images {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.55rem;
+}
+.image-wrapper a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 200px;
+    min-height: 200px;
+    background-color: #EEE;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 10px;
+}
+.file-wrapper{
+    display: flex;
+    flex-direction: column;
+}
+    </style>
+    <title>Media Search</title>
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <div class="form-search">
+        </div>
+        <h1>Media Archive</h1>
+        <!-- we just want to display media -->
+        <div class="media-collection">
+            <!-- Videos -->
+            <div class="video-clips-wrapper">
+                <div class="media-title">
+                    <h2>Videos</h2>
+                </div>
+                <div class="video-clips">
+                    {% for item in media %}
+                        {% if item.media_type == 'video' %}
+                        <div class="video-wrapper">
+                            <video controls>
+                                <source src="{{ item.file }}" type="video/mp4">
+                            </video>
+                            <span>{{ item.title }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Audios -->
+            <div class="audio-clips">
+                <div class="media-title">
+                    <h2>Audios</h2>
+                </div>
+                {% for item in media %}
+                    {% if item.media_type == 'audio' %}
+                        <div class="audio-wrapper">
+                            <audio controls>
+                                <source src="{{ item.file }}" type="audio/mp3">
+                            </audio>
+                            <span>{{ item.title }}</span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <!-- Images -->
+            <div class="images-wrapper">
+                <div class="media-title">
+                    <h2>Images</h2>
+                </div>
+                <div class="images">
+                    {% for item in media %}
+                        {% if item.media_type == 'image' %}
+                            <div class="image-wrapper">
+                                <a href="{{ item.file }}" target="_blank">
+                                    <img src="{{ item.file }}" alt="{{ item.title }}">
+                                    <span>{{ item.title }}</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Files -->
+            <div class="files">
+                <div class="media-title">
+                    <h2>Files</h2>
+                </div>
+                {% for item in media %}
+                    {% if item.media_type == 'file' %}
+                        <div class="file-wrapper">
+                            <a href="{{ item.file }}" target="_blank">
+                                <span>{{ item.title }}</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
