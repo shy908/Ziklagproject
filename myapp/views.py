@@ -1,12 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.contrib.postgres.search import SearchVector, SearchQuery
 from .models import UploadMedia
-from .forms import UploadMediaForm
+from .forms import UploadMediaForm, UserEditForm
+
+from django.conf import settings
+import os
 
 def home(request):
     return render(request, 'home.html')
@@ -154,12 +158,18 @@ def delete_media(request, media_id):
 
     # Delete the media file from the file storage system
     if media.file:
-        media.file.delete()
+        file_path = os.path.join(settings.MEDIA_ROOT, str(media.file))
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    # Delete the media file from the file storage system
+    #if media.file:
+        #media.file.delete()
 
     # Delete the media object from the database
     media.delete()
 
-    return redirect('media_search')  # Redirect to the media search page after deletion
+    return redirect('media_archive')  # Redirect to the media search page after deletion
 
 def edit_media(request, media_id):
     media = get_object_or_404(UploadMedia, id=media_id)
@@ -168,10 +178,43 @@ def edit_media(request, media_id):
         form = UploadMediaForm(request.POST, instance=media)
         if form.is_valid():
             form.save()
-            return redirect('media_search')  # Redirect to the media search page after editing
+            return redirect('media_archive')  # Redirect to the media search page after editing
     else:
         form = UploadMediaForm(instance=media)
 
     return render(request, 'edit_media.html', {'form': form, 'media': media})
 
+def user_list(request):
+    users = User.objects.all()
+    return render(request, 'user_list.html', {'users': users})
 
+def user_detail(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    return render(request, 'user_detail.html', {'user': user})
+
+def user_add(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # Redirect to the user list or detail page
+            return redirect('user_list')
+    else:
+        form = UserCreationForm()
+    
+    context = {'form': form}
+    return render(request, 'user_add.html', context)
+
+def user_edit(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            # Redirect to the user detail page
+            return redirect('user_detail', user_id=user.id)
+    else:
+        form = UserEditForm(instance=user)
+    
+    context = {'form': form, 'user': user}
+    return render(request, 'user_edit.html', context)

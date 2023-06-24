@@ -1,0 +1,13 @@
+{% for user in users %}
+  <tr>
+    <td>{{ user.first_name }}</td>
+    <td>{{ user.middle_name }}</td>
+    <td>{{ user.last_name }}</td>
+    <td>{{ user.gender }}</td>
+    <td>{{ user.role }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.is_active }}</td>
+    <td><a href="{% url 'user_detail' user_id=user.id %}">View</a></td>
+    <td><a href="{% url 'user_edit' user_id=user.id %}">Edit</a></td>
+  </tr>
+{% endfor %}
