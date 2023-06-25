@@ -1,4 +1,10 @@
-{% for user in users %}
+{% extends 'base.html' %}
+
+{% block title %}Archive | User List{% endblock %}
+
+{% block content %}
+<div class="content">
+  {% for user in users %}
   <tr>
     <td>{{ user.first_name }}</td>
     <td>{{ user.middle_name }}</td>
@@ -11,3 +17,5 @@
     <td><a href="{% url 'user_edit' user_id=user.id %}">Edit</a></td>
   </tr>
 {% endfor %}
+</div>
+{% endblock %}
