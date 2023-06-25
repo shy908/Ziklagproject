@@ -53,54 +53,12 @@ def login_view(request):
     else:
         return render(request, 'login.html')
 
-
 def logout_view(request):
     logout(request)
     return redirect('signup')
- 
-"""def media_archive(request):
-    folder='media/'
-    file_saved = None
-
-    if request.method == "POST":
-        title = request.POST['title'] if 'title' in request.POST else '' #empty string provide default if key is not present
-        description = request.POST['description'] if 'description' in request.POST else ''
-        file = request.FILES['file'] if 'file' in request.POST else ''
-
-        # add hyphen to any whitespaces in the filename
-        filename_with_hyphen = file.name.replace(' ','').lower()
-
-        # handle file upload with FileStorage
-        fs = FileSystemStorage(location=folder)
-        saved_file_name = fs.save(filename_with_hyphen, file)
-
-        # check if file is saved to folder
-        if saved_file_name:
-            file_saved = True
-
-        # this should the http://localhost:8000/
-        hostname = 'http://' + request.get_host()
-
-        # this should the link to the file
-        # http://localhost:8000/media/filename
-        file_url = hostname + '/' + folder + filename_with_hyphen
-
-        if file_saved:
-            # save info to DBd
-            db_insert = UploadMedia(title=title, description=description, file=file_url)
-            db_insert.save()
-
-    if file_saved:
-        return HttpResponseRedirect('/')  # stop duplicate upload on page refresh
-
-    # Retrieve media files from the database
-    media_files = UploadMedia.objects.all()  # UploadMedia for storing media info from models.py
-
-    return render(request, 'media_archive.html', {'media_files': media_files})"""
 
 def getMediaData(request):
     media = UploadMedia.objects.all()
-    print(media)
     return render(request, 'media_search.html', {'media': media})
 
 def media_search(request):

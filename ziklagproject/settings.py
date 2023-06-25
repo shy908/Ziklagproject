@@ -56,7 +56,9 @@ ROOT_URLCONF = 'ziklagproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'shared_templates'),],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'shared_templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -86,6 +88,18 @@ DATABASES = {
     }
 }
 
+""" - Bongani's Configuration
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mydb',
+        'USER': 'root',
+        'PASSWORD': 'innovative77',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+"""
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -122,18 +136,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-#MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'media').replace('\\', '/') - don't use this line 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTHENTICATION_BACKENDS = [    'django.contrib.auth.backends.ModelBackend',]
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend',]
 AUTH_USER_MODEL = 'myapp.CustomUser'

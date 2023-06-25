@@ -1,2 +1,4 @@
 myenv
 media
+myapp/__pycache__
+myapp/migrations

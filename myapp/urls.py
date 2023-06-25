@@ -1,6 +1,7 @@
 from django.urls import path, include
 from myapp import views
-from .views import home, signup, media_archive, getMediaData, login_view, logout_view, delete_media, edit_media
+from .views import *
+#from .views import home, signup, media_archive, getMediaData, login_view, logout_view, delete_media, edit_media
 #from .views import home, signup, media_archive, getMediaData, login_view, logout_view
 
 urlpatterns = [
