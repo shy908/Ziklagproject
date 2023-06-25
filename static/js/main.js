@@ -12,6 +12,7 @@ class Scripts{
     init(){
         this.animateBurgerMenu();
         this.copyRightYear();
+        this.buttonSubmit();
     }
     animateBurgerMenu(){
 
@@ -31,6 +32,26 @@ class Scripts{
         if(copyright != undefined){
             let year = new Date().getFullYear();
             copyright.innerHTML = (year > 2023) ? `&copy; 2023 - ${year} | JRM Archive` : `&copy; ${year} | JRM Archive` ;
+        }
+    }
+    buttonSubmit(){
+        const formButton = document.querySelectorAll('button[type="submit"]');
+        if(formButton != undefined){
+            formButton.forEach(button => {
+                button.addEventListener('click', () => {
+                    this.checkFormErrors();
+                });
+            });
+        }
+    }
+    checkFormErrors(){
+        const formError = document.querySelectorAll('.form-error');
+        if(formError != undefined){
+            formError.forEach(error => {
+                if(error.value.length < 0 || error.value == ''){
+                    error.classList.toggle('true');
+                }
+            });
         }
     }
 }
