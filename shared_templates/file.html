@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Archive | Files{% endblock %}
+
+{% block content %}
+
+<div class="search-container">
+<div class="search-button">
+<form action="{% url 'files' %}" method="GET">
+    <input type="text" name="query" placeholder="Search..." id="search-input">
+    <button type="submit">&#128269;</button>
+</form>
+</div>
+</div>
+<br>
+<div class="files">
+    <div class="media-title">
+        <h2>Files</h2>
+    </div>
+    {% for item in media %}
+        {% if item.media_type == 'file' %}
+            <div class="file-wrapper">
+                <a href="{{ item.file }}" target="_blank" download="{{ item.title }}">
+                    <span>{{ item.title }}</span>
+                </a>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+</div> 
+</div>  
+</div>
+{% endblock %}

@@ -52,11 +52,11 @@
                                 <video src="{{ media.file }}" controls></video>
                             {% elif media.media_type == 'audio' %}
                                 <audio src="{{ media.file }}" controls></audio>
+                            {% elif media.media_type == 'file' %}
+                                <a href="{{ media.file }}" download>{{ media.title }}</a>
                             {% endif %}
                             <div class="media-actions">
                                 <a href="{% url 'edit_media' media.id %}">Edit</a>
-                                <a href="{% url 'user_list' %}">View Users</a>
-                                <a href="{% url 'user_add' %}">Add User</a>
                                 <form method="POST" action="{% url 'delete_media' media.id %}">
                                     {% csrf_token %}
                                     <button type="submit">Delete</button>

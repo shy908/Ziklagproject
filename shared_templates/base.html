@@ -25,12 +25,21 @@
                 <ul>
                     <li><a href="{% url 'home' %}" title="Home">Home</a></li>
                     <li><a href="{% url 'media_archive' %}" title="Media">Media Archive</a></li>
-                    <li><a href="{% url 'media_search' %}" title="Search">Media Search</a></li>
+                    <li><a href="{% url 'videos' %}" title="videos">Videos</a></li>
+                    <li><a href="{% url 'audios' %}" title="audios">Audios</a></li>
+                    <li><a href="{% url 'images' %}" title="images">Images</a></li>
+                    <li><a href="{% url 'files' %}" title="files">Files</a></li>
                     {% if user.is_authenticated %}
                         <li><a href="{% url 'user_list' %}" title="Users">Users</a></li>
                     {% endif %}
+                    {% if not user.is_authenticated %}
+                        <li><a href="{% url 'login' %}" title="Login">Login</a></li>
+                    {% else %}
+                        <li><a href="{% url 'logout' %}" title="Logout">Logout</a></li>
+                    {% endif %}
                     <li><a href="{% url 'signup' %}" title="Sign Up">Sign Up</a></li>
                 </ul>
+                
             </nav>
         </header>
     </div>

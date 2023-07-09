@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Archive | Videos{% endblock %}
+
+{% block content %}
+<style>
+    .search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 10vh;
+}
+
+.search-button {
+  background-color: #f8f9fa;
+  border: 2px solid #333;
+  border-radius: 20px;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  transition: background-color 0.3s;
+}
+
+.search-button input[type="text"] {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 18px;
+  padding: 6px;
+  margin-left: 8px;
+  border-radius: 0;
+}
+
+.search-button button {
+  background-color: grey;
+  color: #fff;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.search-button button:focus {
+  outline: none;
+}
+.search-button button:hover {
+    background-color: #23527c;
+  }
+
+
+    .media-title{
+        margin-bottom: 10px;
+    }
+
+    .video-clips {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .video-wrapper {
+        width: calc((100% - 40px) / 3);
+        height: 53vh;
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    video {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .media-info {
+        position: absolute;
+        bottom: 1;
+        left: 0;
+        right: 0;
+        padding: 5px;
+        color:  black;
+        text-align: center;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .media-info h4,
+    .media-info p {
+        margin: 0;
+    }
+    .media-info p {
+        font-size: 14px;
+        font-style: initial;
+    }
+
+    .video-title {
+        font-size: 18px;
+        font-style: initial;
+        margin-bottom: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+    }
+
+    .max-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+    .video-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 5px;
+    }
+
+    .video-info p {
+        margin: 0;
+    }
+</style>
+<div class="search-container">
+<div class="search-button">
+<form action="{% url 'videos' %}" method="GET">
+    <input type="text" name="query" placeholder="Search..." id="search-input">
+    <button type="submit">&#128269;</button>
+</form>
+</div>
+</div>
+<br>
+<div class="video-clips-wrapper">
+    <div class="media-title">
+        <h2>Videos</h2>
+    </div>
+    <div class="video-clips">
+        {% for item in media %}
+            {% if item.media_type == 'video' %}
+            <div class="video-wrapper">
+                <video controls>
+                    <source src="{{ item.file }}" type="video/mp4">
+                </video>
+                <div class="media-info">     
+            <h4 class="video-title max-lines">{{ item.title }}</h4>
+            <p>Uploaded by: {% if item.media_type == 'video' %}{{ item.uploaded_by }}{% endif %}</p>
+            <p>Uploaded at: {% if item.media_type == 'video' %}{{ item.created_time|date:"F d, Y H:i:s" }}{% endif %}</p>
+            </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
