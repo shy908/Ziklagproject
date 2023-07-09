@@ -1,19 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import get_user_model
+from .forms import UserEditForm
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
-from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.contrib.postgres.search import SearchVector, SearchQuery
 from .models import UploadMedia
-from .forms import UploadMediaForm, UserEditForm
-
+from myapp.models import CustomUser
+from .forms import UploadMediaForm, CustomUserCreationForm
+from django.urls import reverse
 from django.conf import settings
 import os
+from django.db.models import Q
 
 def home(request):
-    return render(request, 'home.html')
+    media = UploadMedia.objects.all().order_by('-id')
+    return render(request, 'home.html', {'media': media})
 
 def signup(request):
     if request.method == 'POST':
@@ -22,14 +26,17 @@ def signup(request):
         email = request.POST['email']
         password = request.POST['password']
         phone = request.POST['phone']
+        middle_name = request.POST.get('middle_name', '')  # Use get() with a default value
+        last_name = request.POST.get('last_name', '')  # Use get() with a default value
+
 
         # Create the user
-        user = User.objects.create_user(username=email, email=email, password=password)
+        user = User.objects.create_user(username=name, email=email, password=password)
         user.first_name = name
+        user.phone_number = phone
         user.save()
-
         # Log the user in
-        authenticated_user = authenticate(request, username=email, password=password)
+        authenticated_user = authenticate(request, username=name, password=password)
         if authenticated_user is not None:
             login(request, authenticated_user)
 
@@ -57,31 +64,9 @@ def logout_view(request):
     logout(request)
     return redirect('signup')
 
-def getMediaData(request):
-    media = UploadMedia.objects.all()
-    return render(request, 'media_search.html', {'media': media})
-
-def media_search(request):
-    if request.method == 'POST':
-        search_query = request.POST.get('mediasearch', '')
-        # case-insensitive search by title
-        search_results = UploadMedia.objects.filter(title__icontains=search_query)
-    else:
-        search_results = None
-
-    media_files = UploadMedia.objects.all()
-
-    grouped_media = {}
-    for media in media_files:
-        media_type = media.media_type
-        if media_type not in grouped_media:
-            grouped_media[media_type] = []
-        grouped_media[media_type].append(media)
-
-    return render(request, 'media_search.html', {'grouped_media': grouped_media})
-
-    #context = {'search_results': search_results}
-    #return render(request, 'media_search.html', context)
+"""def getMediaData(request):
+    media = UploadMedia.objects.all().order_by('-id')
+    return render(request, 'media_search.html', {'media': media})"""
 
 def media_archive(request):
     if request.method == "POST":
@@ -107,7 +92,7 @@ def media_archive(request):
             return HttpResponseRedirect('/')  # Redirect after successful upload
 
     # Retrieve media files from the database
-    media_files = UploadMedia.objects.all()
+    media_files = UploadMedia.objects.all().order_by('-id')
 
     return render(request, 'media_archive.html', {'media_files': media_files})
 
@@ -119,11 +104,6 @@ def delete_media(request, media_id):
         file_path = os.path.join(settings.MEDIA_ROOT, str(media.file))
         if os.path.exists(file_path):
             os.remove(file_path)
-
-    # Delete the media file from the file storage system
-    #if media.file:
-        #media.file.delete()
-
     # Delete the media object from the database
     media.delete()
 
@@ -142,37 +122,89 @@ def edit_media(request, media_id):
 
     return render(request, 'edit_media.html', {'form': form, 'media': media})
 
+User = get_user_model()
+
 def user_list(request):
     users = User.objects.all()
     return render(request, 'user_list.html', {'users': users})
 
-def user_detail(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    return render(request, 'user_detail.html', {'user': user})
-
 def user_add(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            # Redirect to the user list or detail page
             return redirect('user_list')
     else:
-        form = UserCreationForm()
-    
-    context = {'form': form}
-    return render(request, 'user_add.html', context)
+        form = CustomUserCreationForm()
+    return render(request, 'user_add.html', {'form': form})
 
-def user_edit(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+def user_detail(request, pk):
+    user = User.objects.get(pk=pk)
+    return render(request, 'user_detail.html', {'user': user})
+
+def user_edit(request, pk):
+    user = get_object_or_404(User, pk=pk)
+
     if request.method == 'POST':
         form = UserEditForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            # Redirect to the user detail page
-            return redirect('user_detail', user_id=user.id)
+            return redirect('user_detail', pk=user.pk)
     else:
         form = UserEditForm(instance=user)
+
+    return render(request, 'user_edit.html', {'form': form})
     
-    context = {'form': form, 'user': user}
-    return render(request, 'user_edit.html', context)
+def videos(request):
+    query = request.GET.get('query') # this is to get the search query from the request
+
+    if query:
+        # Perform the search based on the query
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) |  # Search for title containing the query
+            Q(description__icontains=query)  # Search for description containing the query
+        ).order_by('-id')
+    else:
+        # If no query is provided, display all videos
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'video.html', {'media': media, 'query': query})
+
+def audios(request):
+    query = request.GET.get('query') 
+
+    if query:
+        media = UploadMedia.objects.filter(
+        Q(title__icontains=query) |  
+        Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'audio.html', {'media': media, 'query': query})
+
+def images(request):
+    query = request.GET.get('query') 
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) |  
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'image.html', {'media': media, 'query': query})
+
+def files(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'file.html', {'media': media, 'query': query})
