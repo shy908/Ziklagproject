@@ -315,3 +315,43 @@ footer .copyright span{
     overflow-y: auto;
     min-height: var(--page-min-height-800);
 }
+/* ==== USER LIST ==== */
+.user-list{
+    border: 1px solid var(--color-dark-grey);
+    overflow: hidden;
+    overflow-x: auto;
+    width: 100%;
+    max-width: var(--page-width-1300);
+}
+.user-header,
+.user{
+    display: grid;
+    grid-template-columns: repeat(9 ,1fr);
+    border-radius: 15px;
+}
+.user{
+    align-items: center;
+}
+.user:hover{
+    background: var(--color-jrm-grey);
+}
+.user:nth-child(even){
+    background: rgba(238,238,238,0.3);
+}
+.user-header span{
+    border: 1px solid var(--color-jrm-grey);
+    font-weight: 600;
+}
+.user-header span,
+.user span{
+    padding: 5px;
+    font-size: 0.9rem;
+    width: 100%;
+    max-width: 106px;
+    word-wrap: break-word;
+}
+.user span a{
+    display: inline;
+}
+/* Styles for home.html */
+
