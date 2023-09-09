@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %} Archive | News{% endblock %}
+
+{% block content %}
+<div class="content">
+    <h1>News and Updates</h1>
+    
+    <div class="search-container">
+        <div class="search-button">
+            <form action="{% url 'sermons' %}" method="GET">
+                <input type="text" name="query" placeholder="Search..." id="search-input">
+                <button type="submit">&#128269;</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="video-clips-wrapper">
+        <div class="video-clips">
+            {% for item in media %}
+                {% if item.media_type == 'video' and item.category == 'news' %}
+                    <div class="video-wrapper">
+                        <video controls>
+                            <source src="{{ item.file }}" type="video/mp4">
+                        </video>
+                        <div class="media-info">     
+                            <h4 class="video-title max-lines">{{ item.title }}</h4>
+                            <p>Uploaded by: {{ item.uploaded_by }}</p>
+                            <p>Uploaded at: {{ item.created_time|date:"F d, Y H:i:s" }}</p>
+                        </div>
+                    </div>
+                    {% elif item.media_type == 'audio' and item.category == 'news' %}
+                    <div class="audio-wrapper">
+                        <audio controls>
+                            <source src="{{ item.file }}" type="audio/mp3">
+                        </audio>
+                        <h4 class="video-title max-lines">{{ item.title }}</h4>
+                        <p>Uploaded by: {{ item.uploaded_by }}</p>
+                        <p>Uploaded at: {{ item.created_time|date:"F d, Y H:i:s" }}</p>
+                    </div>
+                    {% elif item.media_type == 'file' and item.category == 'news' %}
+                    <div class="file-wrapper">
+                        <a href="{{ item.file }}" target="_blank" download="{{ item.title }}">
+                            <span>{{ item.title }}</span>
+                        </a>
+                    </div>
+                    {% elif item.media_type == 'image' and item.category == 'news' %}
+                    <div class="image-wrapper">
+                        <a href="{{ item.file }}" target="_blank">
+                            <img src="{{ item.file }}" alt="{{ item.title }}">
+                            <span>{{ item.title }}</span>
+                        </a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Archive | Search{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <h1>Media Search</h1>
+    <div class="inner-content">
+        <div class="media-collection">
+            <!-- Videos -->
+            <div class="video-clips-wrapper">
+                <div class="media-title">
+                    <h2>Videos</h2>
+                </div>
+                <div class="video-clips">
+                    {% for item in media %}
+                        {% if item.media_type == 'video' %}
+                        <div class="video-wrapper">
+                            <video controls>
+                                <source src="{{ item.file }}" type="video/mp4">
+                            </video>
+                            <div class="media-info">     
+                        <h4 class="video-title max-lines">{{ item.title }}</h4>
+                        <p>Uploaded by: {% if item.media_type == 'video' %}{{ item.uploaded_by }}{% endif %}</p>
+                        <p>Uploaded time: {% if item.media_type == 'video' %}{{ item.created_time|date:"F d, Y H:i:s" }}{% endif %}</p>
+                        </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Audios -->
+            <div class="audio-clips">
+                <div class="media-title">
+                    <h2>Audios</h2>
+                </div>
+                {% for item in media %}
+                    {% if item.media_type == 'audio' %}
+                        <div class="audio-wrapper">
+                            <audio controls>
+                                <source src="{{ item.file }}" type="audio/mp3">
+                            </audio>
+                            <span>{{ item.title }}</span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <!-- Images -->
+            <div class="images-wrapper">
+                <div class="media-title">
+                    <h2>Images</h2>
+                </div>
+                <div class="images">
+                    {% for item in media %}
+                        {% if item.media_type == 'image' %}
+                            <div class="image-wrapper">
+                                <a href="{{ item.file }}" target="_blank">
+                                    <img src="{{ item.file }}" alt="{{ item.title }}">
+                                    <span>{{ item.title }}</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Files -->
+            <div class="files">
+                <div class="media-title">
+                    <h2>Files</h2>
+                </div>
+                {% for item in media %}
+                    {% if item.media_type == 'file' %}
+                        <div class="file-wrapper">
+                            <a href="{{ item.file }}" target="_blank" download="{{ item.title }}">
+                                <span>{{ item.title }}</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div> 
+    </div>  
+</div>
+{% endblock %}

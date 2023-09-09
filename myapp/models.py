@@ -1,9 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.conf import settings
-
 
 def media_upload_path(instance, filename):
     return f'media/{filename}'
@@ -23,6 +21,18 @@ class UploadMedia(models.Model):
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1)
     created_time = models.DateTimeField(default=timezone.now)
 
+    CATEGORY_CHOICES = (
+        ('sermon', 'Sermon'),
+        ('event', 'Event'),
+        ('news', 'News'),   
+        ('song', 'Song'),
+        ('youth', 'Youth'),
+        ('image', 'Image'),
+        ('younggeneration', 'Younggeneration'),
+        ('testimony', 'Testimony'),
+    )
+
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='sermon')
     class Meta:
         db_table = 'myapp_uploadmedia'
 
@@ -73,6 +83,3 @@ class CustomUser(AbstractUser):
         help_text='The groups this user belongs to.',
         related_name='customuser_set'
     )
-
-    def __str__(self):
-        return self.username

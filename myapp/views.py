@@ -1,23 +1,35 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-from .forms import UserEditForm
-from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import default_storage
 from django.contrib.postgres.search import SearchVector, SearchQuery
-from .models import UploadMedia
-from myapp.models import CustomUser
-from .forms import UploadMediaForm, CustomUserCreationForm
 from django.urls import reverse
 from django.conf import settings
 import os
 from django.db.models import Q
+from itertools import chain
+from .models import UploadMedia
+from .forms import UploadMediaForm, CustomUserCreationForm
+
 
 def home(request):
-    media = UploadMedia.objects.all().order_by('-id')
-    return render(request, 'home.html', {'media': media})
+    query = request.GET.get('query') 
+
+    # Filter media by category 'news' and order by created_time
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query),
+            category='news'  # Filter by the 'news' category
+        ).order_by('-created_time')[:3]  # Limit to the last three news items
+    else:
+        media = UploadMedia.objects.filter(category='news').order_by('-created_time')[:3]
+
+    return render(request, 'home.html', {'media': media, 'query': query})
+
 
 def signup(request):
     if request.method == 'POST':
@@ -64,29 +76,28 @@ def logout_view(request):
     logout(request)
     return redirect('signup')
 
-"""def getMediaData(request):
-    media = UploadMedia.objects.all().order_by('-id')
-    return render(request, 'media_search.html', {'media': media})"""
-
-def media_archive(request):
+def upload(request):
     if request.method == "POST":
         title = request.POST.get('title', '')
         description = request.POST.get('description', '')
         file = request.FILES.get('file', None)
-        file_type = request.POST.get('filetype','')
-        #hyphen for any whitespaces in a filename
-        filename_with_hyphen = file.name.replace(' ','-').lower()
+        file_type = request.POST.get('filetype', '')
+        category = request.POST.get('category', '')
+        filename_with_hyphen = file.name.replace(' ', '-').lower()
 
         if file:
-            # handle file upload with FileSystemStorage
+            # Handle file upload with FileSystemStorage
             fs = FileSystemStorage(location='media/')
             saved_file = fs.save(filename_with_hyphen, file)
-
-            # this should be the URL to the uploaded file
             file_url = fs.url(saved_file)
 
-            # save info to DB
-            db_insert = UploadMedia(title=title, description=description, file=file_url, media_type=file_type)
+            if not category:
+                # If category is not selected, display an error message
+                error = 'Please select a category.'
+
+            # Save info to DB
+            db_insert = UploadMedia(title=title, description=description, file=file_url,
+                                    category=category, media_type=file_type)
             db_insert.save()
 
             return HttpResponseRedirect('/')  # Redirect after successful upload
@@ -94,7 +105,7 @@ def media_archive(request):
     # Retrieve media files from the database
     media_files = UploadMedia.objects.all().order_by('-id')
 
-    return render(request, 'media_archive.html', {'media_files': media_files})
+    return render(request, 'upload.html', {'media_files': media_files})
 
 def delete_media(request, media_id):
     media = get_object_or_404(UploadMedia, id=media_id)
@@ -107,7 +118,8 @@ def delete_media(request, media_id):
     # Delete the media object from the database
     media.delete()
 
-    return redirect('media_archive')  # Redirect to the media search page after deletion
+    return redirect('upload')  # Redirect to the media search page after deletion
+    
 
 def edit_media(request, media_id):
     media = get_object_or_404(UploadMedia, id=media_id)
@@ -116,87 +128,34 @@ def edit_media(request, media_id):
         form = UploadMediaForm(request.POST, instance=media)
         if form.is_valid():
             form.save()
-            return redirect('media_archive')  # Redirect to the media search page after editing
+            return redirect('upload')  # Redirect to the media search page after editing
     else:
-        form = UploadMediaForm(instance=media)
+        form = UploadMediaForm(instance=media, initial={'category': media.category})
 
     return render(request, 'edit_media.html', {'form': form, 'media': media})
 
 User = get_user_model()
 
-def user_list(request):
-    users = User.objects.all()
-    return render(request, 'user_list.html', {'users': users})
-
-def user_add(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('user_list')
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'user_add.html', {'form': form})
-
-def user_detail(request, pk):
-    user = User.objects.get(pk=pk)
-    return render(request, 'user_detail.html', {'user': user})
-
-def user_edit(request, pk):
-    user = get_object_or_404(User, pk=pk)
-
-    if request.method == 'POST':
-        form = UserEditForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()
-            return redirect('user_detail', pk=user.pk)
-    else:
-        form = UserEditForm(instance=user)
-
-    return render(request, 'user_edit.html', {'form': form})
-    
-def videos(request):
-    query = request.GET.get('query') # this is to get the search query from the request
-
-    if query:
-        # Perform the search based on the query
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) |  # Search for title containing the query
-            Q(description__icontains=query)  # Search for description containing the query
-        ).order_by('-id')
-    else:
-        # If no query is provided, display all videos
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'video.html', {'media': media, 'query': query})
-
-def audios(request):
-    query = request.GET.get('query') 
-
-    if query:
-        media = UploadMedia.objects.filter(
-        Q(title__icontains=query) |  
-        Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'audio.html', {'media': media, 'query': query})
-
-def images(request):
+def media_search(request, category=None, limit=None):
     query = request.GET.get('query') 
 
     if query:
         media = UploadMedia.objects.filter(
             Q(title__icontains=query) |  
             Q(description__icontains=query)  
-        ).order_by('-id')
+        ).order_by('-created_time')
     else:
         media = UploadMedia.objects.all().order_by('-id')
+    
+    if category:
+        media = media.filter(category=category)
 
-    return render(request, 'image.html', {'media': media, 'query': query})
+    if limit:
+        media = media[:limit]
 
-def files(request):
+    return render(request, 'media_search.html', {'media': media, 'query': query})
+
+def testimonies(request):
     query = request.GET.get('query')
 
     if query:
@@ -207,4 +166,155 @@ def files(request):
     else:
         media = UploadMedia.objects.all().order_by('-id')
 
-    return render(request, 'file.html', {'media': media, 'query': query})
+    return render(request, 'testimonies.html', {'media': media, 'query': query})
+
+def news(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'news.html', {'media': media, 'query': query})
+
+def events(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'events.html', {'media': media, 'query': query})
+
+def sermons(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'sermons.html', {'media': media, 'query': query})
+
+def younggeneration(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'younggeneration.html', {'media': media, 'query': query})
+
+def youth(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'youth.html', {'media': media, 'query': query})
+
+def images(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'gallery.html', {'media': media, 'query': query})
+
+def songs(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'songs.html', {'media': media, 'query': query})
+
+def women(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'women.html', {'media': media, 'query': query})
+
+def men(request):
+    query = request.GET.get('query')
+
+    if query:
+        media = UploadMedia.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)  
+        ).order_by('-id')
+    else:
+        media = UploadMedia.objects.all().order_by('-id')
+
+    return render(request, 'men.html', {'media': media, 'query': query})
+
+
+def livestream(request):
+    return render(request, 'livestream.html')
+
+def contact(request):
+    return render(request, 'contact.html')
+
+def about(request):
+    return render(request, 'about.html')
+
+def FAQs(request):
+    return render(request, 'FAQs.html')
+
+def resources(request):
+    return render(request, 'resources.html')
+
+def media_policy(request):
+    return render(request, 'media_policy.html')
+
+def settings(request):
+    return render(request, 'settings.html')
+
+def help(request):
+    return render(request, 'help.html')
+
+def clips(request):
+    return render(request, 'clips')
+
+def feedback(request):
+    return render(request, 'feedback')
+
+
+

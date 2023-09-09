@@ -1,0 +1,46 @@
+*{
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+*::before,
+*::after{
+    -webkit-box-sizing: inherit;
+    box-sizing: inherit;
+}
+ul,
+ol{
+    list-style: none;
+    list-style-type: none;
+}
+a,
+button,
+audio,
+blockquote,
+span,
+strong,
+small{
+    display: inline-block;
+}
+a{
+    text-decoration: none;
+}
+a:hover{
+    text-decoration: inherit;
+}
+img{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    display: block;
+    max-width: 100%;
+}
+video{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    display: block;
+}

@@ -55,3 +55,20 @@ class Scripts{
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownLinks = document.querySelectorAll('.dropdown > a');
+
+    dropdownLinks.forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const subMenu = this.nextElementSibling;
+            subMenu.classList.toggle('active');
+        });
+    });
+});
+
+
+
+  

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Archive | Testimonies{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <div class="search-button">
+        <form action="{% url 'testimonies' %}" method="GET">
+            <input type="text" name="query" placeholder="Search..." id="search-input">
+            <button type="submit">&#128269;</button>
+        </form>
+    </div>
+</div>
+<div class="content">
+    <h1> Testimonies</h1>
+    <div class="inner-content">
+        <div class="media-collection">
+            <!-- Videos -->
+            <div class="video-clips-wrapper">
+                <div class="media-title">
+                    <h2>Videos</h2>
+                </div>
+                <div class="video-clips">
+                    {% for item in media %}
+                        {% if item.media_type == 'video' and item.category == 'testimony' %}
+                        <div class="video-wrapper">
+                            <video controls>
+                                <source src="{{ item.file }}" type="video/mp4">
+                            </video>
+                            <div class="media-info">     
+                        <h4 class="video-title max-lines">{{ item.title }}</h4>
+                        <p>Uploaded by: {% if item.media_type == 'video' %}{{ item.uploaded_by }}{% endif %}</p>
+                        <p>Uploaded time: {% if item.media_type == 'video' %}{{ item.created_time|date:"F d, Y H:i:s" }}{% endif %}</p>
+                        </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <br>
+            <br>
+            <!-- Audios -->
+            <div class="audio-clips">
+                <div class="media-title">
+                    <h2>Audios</h2>
+                </div>
+                {% for item in media %}
+                    {% if item.media_type == 'audio' and item.category == 'testimony' %}
+                        <div class="audio-wrapper">
+                            <audio controls>
+                                <source src="{{ item.file }}" type="audio/mp3">
+                            </audio>
+                            <span>{{ item.title }}</span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <br>
+            <br>
+            <!-- Images -->
+            <div class="images-wrapper">
+                <div class="media-title">
+                    <h2>Images</h2>
+                </div>
+                <div class="images">
+                    {% for item in media %}
+                        {% if item.media_type == 'image' and item.category == 'testimony' %}
+                            <div class="image-wrapper">
+                                <a href="{{ item.file }}" target="_blank">
+                                    <img src="{{ item.file }}" alt="{{ item.title }}">
+                                    <span>{{ item.title }}</span>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <br>
+            <br>
+            <!-- Files -->
+            <div class="files">
+                <div class="media-title">
+                    <h2>Files</h2>
+                </div>
+                {% for item in media %}
+                    {% if item.media_type == 'file' and item.category == 'testimony' %}
+                        <div class="file-wrapper">
+                            <a href="{{ item.file }}" target="_blank" download="{{ item.title }}">
+                                <span>{{ item.title }}</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div> 
+    </div>  
+</div>
+{% endblock %}

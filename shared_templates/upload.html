@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Archive | Archive{% endblock %}
+
+{% block content %}
+<div class="content">
+    <h1>Media Archive</h1>
+    <div class="inner-content">
+        <div class="archive-content">
+            <div class="archive-upload">
+                <h2>Upload</h2>
+                <div class="form-content">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <label for="title">Title<sup>*</sup></label>
+                            <input type="text" name="title" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="description">Description</label>
+                            <textarea name="description"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <label for="file">File</label>
+                            <input type="file" name="file">
+                        </div>
+                        <div class="form-row">
+                            <label for="filetype">File Type</label>
+                            <select name="filetype" required>
+                                <option value="">Please Select</option>
+                                <option value="video">Video</option>
+                                <option value="audio">Audio</option>
+                                <option value="image">Image</option>
+                                <option value="file">File</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category:</label>
+                            <select class="form-control" id="category" name="category" required>
+                                <option value="" selected disabled>Select a category</option>
+                                <option value="sermon">Sermon</option>
+                                <option value="song">Song</option>
+                                <option value="testimony">Testimony</option>
+                                <option value="event">Event</option>
+                                <option value="news">News</option>
+                                <option value="image">Image</option>
+                                <option value="youth">Youth</option>
+                                <option value="younggeneration">Younggeneration</option>
+                            </select>
+                        </div>
+                        <div class="form-submit">
+                            <button type="submit">Upload</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="archive-media">
+                <h2>Uploaded Media</h2>
+                <ul>
+                    {% for media in media_files %}
+                        <li>
+                            <h4>{{ media.title }}</h4>
+                            {% if media.media_type == 'image' %}
+                                <img src="{{ media.file }}" alt="{{ media.title }}">
+                            {% elif media.media_type == 'video' %}
+                                <video src="{{ media.file }}" controls></video>
+                            {% elif media.media_type == 'audio' %}
+                                <audio src="{{ media.file }}" controls></audio>
+                            {% elif media.media_type == 'file' %}
+                                <a href="{{ media.file }}" download>{{ media.title }}</a>
+                            {% endif %}
+                            <div class="media-actions">
+                                <a href="{% url 'edit_media' media.id %}">Edit</a>
+                                <form method="POST" action="{% url 'delete_media' media.id %}">
+                                    {% csrf_token %}
+                                    <button class="delete-button" data-id="{{ media.id }}">Delete</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const deleteButtons = document.querySelectorAll('.delete-button');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent the default action of the button
+
+            const mediaId = button.getAttribute('data-id');
+            const confirmDelete = confirm('Are you sure you want to delete this media?');
+            if (confirmDelete) {
+                window.location.href = `/delete_media/${mediaId}/`;
+            }
+        });
+    });
+</script>
+
+{% endblock %}

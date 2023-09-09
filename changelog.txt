@@ -15,3 +15,7 @@ Monday 26 June 2023 (Bongani)
 - changed format of the base.html template
 - added CSS styles to the header and footer
 - added copyright footer year using javascript
+
+Monday 26 June 2023 - 3pm (S)
+- fixed the media_archive html template file
+- added CSS code to the User Edit page
