@@ -5,15 +5,6 @@
 {% block content %}
 <div class="content">
     <h1>JRM Gallery</h1>
-    
-    <div class="search-container">
-        <div class="search-button">
-            <form action="{% url 'sermons' %}" method="GET">
-                <input type="text" name="query" placeholder="Search..." id="search-input">
-                <button type="submit">&#128269;</button>
-            </form>
-        </div>
-    </div>
     <div class="images"></div>
     {% for item in media %}
     {% if item.media_type == 'image' and item.category == 'image' %}

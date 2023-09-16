@@ -1,0 +1,5 @@
+<form method="GET" action="{% url 'media_search' %}">
+    {% csrf_token %}
+    <input type="text" name="query" placeholder="Search...">
+    <button type="submit">Search</button>
+</form>

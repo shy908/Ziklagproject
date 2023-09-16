@@ -3,6 +3,7 @@
 {% block title %}Archive | Sermons{% endblock %}
 
 {% block content %}
+
 <div class="content">
     <h1> Sermons</h1>
     <div class="inner-content">
@@ -22,7 +23,7 @@
                             <div class="media-info">     
                         <h4 class="video-title max-lines">{{ item.title }}</h4>
                         <p>Uploaded by: {% if item.media_type == 'video' %}{{ item.uploaded_by }}{% endif %}</p>
-                        <p>Uploaded time: {% if item.media_type == 'video' %}{{ item.created_at|date:"F d, Y H:i:s" }}{% endif %}</p>
+                        <p>Uploaded time: {% if item.media_type == 'video' %}{{ item.created_time|date:"F d, Y H:i:s" }}{% endif %}</p>
                         </div>
                         </div>
                         {% endif %}

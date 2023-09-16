@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Archive | Archive{% endblock %}
 
 {% block content %}
+
 <div class="content">
     <h1>Media Archive</h1>
     <div class="inner-content">
@@ -46,6 +47,8 @@
                                 <option value="image">Image</option>
                                 <option value="youth">Youth</option>
                                 <option value="younggeneration">Younggeneration</option>
+                                <option value="men">Men</option>
+                                <option value="women">Women</option>
                             </select>
                         </div>
                         <div class="form-submit">
@@ -60,10 +63,10 @@
                     {% for media in media_files %}
                         <li>
                             <h4>{{ media.title }}</h4>
-                            {% if media.media_type == 'image' %}
+                            {% if media.media_type == 'video' %}
+                            <video src="{{ media.file }}" controls></video>
+                            {% elif media.media_type == 'image' %}
                                 <img src="{{ media.file }}" alt="{{ media.title }}">
-                            {% elif media.media_type == 'video' %}
-                                <video src="{{ media.file }}" controls></video>
                             {% elif media.media_type == 'audio' %}
                                 <audio src="{{ media.file }}" controls></audio>
                             {% elif media.media_type == 'file' %}
