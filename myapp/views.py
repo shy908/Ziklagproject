@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
@@ -12,7 +13,7 @@ import os
 from django.db.models import Q
 from itertools import chain
 from .models import UploadMedia
-from .forms import UploadMediaForm, CustomUserCreationForm
+from .forms import UploadMediaForm, CustomUserCreationForm, SearchForm
 
 
 def home(request):
@@ -43,12 +44,12 @@ def signup(request):
 
 
         # Create the user
-        user = User.objects.create_user(username=name, email=email, password=password)
+        user = User.objects.create_user(username=email, email=email, password=password)
         user.first_name = name
         user.phone_number = phone
         user.save()
         # Log the user in
-        authenticated_user = authenticate(request, username=name, password=password)
+        authenticated_user = authenticate(request, username=email, password=password)
         if authenticated_user is not None:
             login(request, authenticated_user)
 
@@ -56,12 +57,13 @@ def signup(request):
         return redirect('home')
 
     return render(request, 'signup.html')
-
 def login_view(request):
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+        email = request.POST.get('email', '')  # Use get() with a default value
+        password = request.POST.get('password', '')  # Use get() with a default value
+        print(f"Email: {email}, Password: {password}")  # Debugging line
+
+        user = authenticate(request, username=email, password=password)
         
         if user is not None:
             login(request, user)  # Login the user
@@ -136,155 +138,80 @@ def edit_media(request, media_id):
 
 User = get_user_model()
 
-def media_search(request, category=None, limit=None):
-    query = request.GET.get('query') 
+def media_search(request):
+    form = SearchForm(request.GET)
+    results = []
 
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) |  
-            Q(description__icontains=query)  
-        ).order_by('-created_time')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-    
-    if category:
-        media = media.filter(category=category)
+    if form.is_valid():
+        query = form.cleaned_data['query']
+        # Perform the search based on your model and query here
+        results = UploadMedia.objects.filter(title__icontains=query)
+        print(results) 
 
-    if limit:
-        media = media[:limit]
-
-    return render(request, 'media_search.html', {'media': media, 'query': query})
+    return render(request, 'media_search.html', {'form': form, 'results': results})
 
 def testimonies(request):
-    query = request.GET.get('query')
+    # Filter media items by category 'testimony'
+    media = UploadMedia.objects.filter(category='testimony')
 
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'testimonies.html', {'media': media, 'query': query})
-
-def news(request):
-    query = request.GET.get('query')
-
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'news.html', {'media': media, 'query': query})
-
-def events(request):
-    query = request.GET.get('query')
-
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'events.html', {'media': media, 'query': query})
-
-def sermons(request):
-    query = request.GET.get('query')
-
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'sermons.html', {'media': media, 'query': query})
-
-def younggeneration(request):
-    query = request.GET.get('query')
-
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'younggeneration.html', {'media': media, 'query': query})
-
-def youth(request):
-    query = request.GET.get('query')
-
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'youth.html', {'media': media, 'query': query})
-
-def images(request):
-    query = request.GET.get('query')
-
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
-
-    return render(request, 'gallery.html', {'media': media, 'query': query})
+    return render(request, 'testimonies.html', {'media': media})
 
 def songs(request):
-    query = request.GET.get('query')
+    # Filter media items by category 'songs'
+    media = UploadMedia.objects.filter(category='song')
 
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
+    return render(request, 'songs.html', {'media': media})
 
-    return render(request, 'songs.html', {'media': media, 'query': query})
+def news(request):
+    # Filter media items by category 'news'
+    media = UploadMedia.objects.filter(category='news')
 
-def women(request):
-    query = request.GET.get('query')
+    return render(request, 'news.html', {'media': media})
 
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
+def events(request):
+    # Filter media items by category 'events'
+    media = UploadMedia.objects.filter(category='event')
 
-    return render(request, 'women.html', {'media': media, 'query': query})
+    return render(request, 'events.html', {'media': media})
+
+def sermons(request):
+    # Filter media items by category 'sermon'
+    media = UploadMedia.objects.filter(category='sermon')
+
+    return render(request, 'sermons.html', {'media': media})
+
+def younggeneration(request):
+    # Filter media items by category 'younggeneration'
+    media = UploadMedia.objects.filter(category='younggeneration')
+
+    return render(request, 'younggeneration.html', {'media': media})
+
+def youth(request):
+    # Filter media items by category 'youth'
+    media = UploadMedia.objects.filter(category='youth')
+
+    return render(request, 'youth.html', {'media': media})
+
+def images(request):
+    # Filter media items by category 'image'
+    media = UploadMedia.objects.filter(category='image')
+
+    return render(request, 'gallery.html', {'media': media})
 
 def men(request):
-    query = request.GET.get('query')
+    # Filter media items by category 'men'
+    media = UploadMedia.objects.filter(category='men')
 
-    if query:
-        media = UploadMedia.objects.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)  
-        ).order_by('-id')
-    else:
-        media = UploadMedia.objects.all().order_by('-id')
+    return render(request, 'men.html', {'media': media})
 
-    return render(request, 'men.html', {'media': media, 'query': query})
+def women(request):
+    # Filter media items by category 'women'
+    media = UploadMedia.objects.filter(category='women')
 
+    return render(request, 'women.html', {'media': media})
+
+def clips(request):
+    return render(request, 'clips')
 
 def livestream(request):
     return render(request, 'livestream.html')
@@ -309,9 +236,6 @@ def settings(request):
 
 def help(request):
     return render(request, 'help.html')
-
-def clips(request):
-    return render(request, 'clips')
 
 def feedback(request):
     return render(request, 'feedback')

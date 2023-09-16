@@ -30,6 +30,8 @@ class UploadMedia(models.Model):
         ('image', 'Image'),
         ('younggeneration', 'Younggeneration'),
         ('testimony', 'Testimony'),
+        ('men', 'Men'),
+        ('women', 'Women'),
     )
 
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='sermon')
