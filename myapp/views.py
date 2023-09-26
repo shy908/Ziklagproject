@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import get_user_model
@@ -10,10 +12,15 @@ from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.urls import reverse
 from django.conf import settings
 import os
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from itertools import chain
-from .models import UploadMedia
-from .forms import UploadMediaForm, CustomUserCreationForm, SearchForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .models import UploadMedia, CustomUser
+from .forms import UploadMediaForm, SearchForm,  SignupForm, UserRegistrationForm, UserEditForm
 
 
 def home(request):
@@ -33,46 +40,44 @@ def home(request):
 
 
 def signup(request):
-    if request.method == 'POST':
-        # Get the form data
-        name = request.POST['name']
-        email = request.POST['email']
-        password = request.POST['password']
-        phone = request.POST['phone']
-        middle_name = request.POST.get('middle_name', '')  # Use get() with a default value
-        last_name = request.POST.get('last_name', '')  # Use get() with a default value
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = SignupForm()
+    return render(request, 'signup.html', {'form': form})
 
-
-        # Create the user
-        user = User.objects.create_user(username=email, email=email, password=password)
-        user.first_name = name
-        user.phone_number = phone
-        user.save()
-        # Log the user in
-        authenticated_user = authenticate(request, username=email, password=password)
-        if authenticated_user is not None:
-            login(request, authenticated_user)
-
-        # Redirect to the homepage
-        return redirect('home')
-
-    return render(request, 'signup.html')
 def login_view(request):
     if request.method == "POST":
-        email = request.POST.get('email', '')  # Use get() with a default value
-        password = request.POST.get('password', '')  # Use get() with a default value
-        print(f"Email: {email}, Password: {password}")  # Debugging line
-
-        user = authenticate(request, username=email, password=password)
-        
-        if user is not None:
-            login(request, user)  # Login the user
-            return redirect('home')  # Redirect to the home page 
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            # Get the user's email and password from the form
+            email = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            
+            # Authenticate the user
+            user = authenticate(request, username=email, password=password)
+            
+            if user is not None:
+                # Log the user in
+                login(request, user)
+                # Redirect to the home page or any other desired page
+                return redirect('home')
+            else:
+                # Authentication failed, show an error message
+                error = 'Invalid email or password. Please try again.'
         else:
-            error = 'Invalid username or password, please try again...'
-            return render(request, 'login.html', {'error': error})
+            # Form validation failed, show an error message
+            error = 'Invalid form submission. Please check your inputs.'
     else:
-        return render(request, 'login.html')
+        # Render the login form for GET requests
+        form = AuthenticationForm()
+        error = None
+
+    return render(request, 'login.html', {'form': form, 'error': error})
 
 def logout_view(request):
     logout(request)
@@ -144,7 +149,6 @@ def media_search(request):
 
     if form.is_valid():
         query = form.cleaned_data['query']
-        # Perform the search based on your model and query here
         results = UploadMedia.objects.filter(title__icontains=query)
         print(results) 
 
@@ -152,61 +156,61 @@ def media_search(request):
 
 def testimonies(request):
     # Filter media items by category 'testimony'
-    media = UploadMedia.objects.filter(category='testimony')
+    media = UploadMedia.objects.filter(category='testimony').order_by('-created_time')
 
     return render(request, 'testimonies.html', {'media': media})
 
 def songs(request):
     # Filter media items by category 'songs'
-    media = UploadMedia.objects.filter(category='song')
+    media = UploadMedia.objects.filter(category='song').order_by('-created_time')
 
     return render(request, 'songs.html', {'media': media})
 
 def news(request):
     # Filter media items by category 'news'
-    media = UploadMedia.objects.filter(category='news')
+    media = UploadMedia.objects.filter(category='news').order_by('-created_time')
 
     return render(request, 'news.html', {'media': media})
 
 def events(request):
     # Filter media items by category 'events'
-    media = UploadMedia.objects.filter(category='event')
+    media = UploadMedia.objects.filter(category='event').order_by('-created_time')
 
     return render(request, 'events.html', {'media': media})
 
 def sermons(request):
     # Filter media items by category 'sermon'
-    media = UploadMedia.objects.filter(category='sermon')
+    media = UploadMedia.objects.filter(category='sermon').order_by('-created_time')
 
     return render(request, 'sermons.html', {'media': media})
 
 def younggeneration(request):
     # Filter media items by category 'younggeneration'
-    media = UploadMedia.objects.filter(category='younggeneration')
+    media = UploadMedia.objects.filter(category='younggeneration').order_by('-created_time')
 
     return render(request, 'younggeneration.html', {'media': media})
 
 def youth(request):
     # Filter media items by category 'youth'
-    media = UploadMedia.objects.filter(category='youth')
+    media = UploadMedia.objects.filter(category='youth').order_by('-created_time')
 
     return render(request, 'youth.html', {'media': media})
 
 def images(request):
     # Filter media items by category 'image'
-    media = UploadMedia.objects.filter(category='image')
+    media = UploadMedia.objects.filter(category='image').order_by('-created_time')
 
     return render(request, 'gallery.html', {'media': media})
 
 def men(request):
     # Filter media items by category 'men'
-    media = UploadMedia.objects.filter(category='men')
+    media = UploadMedia.objects.filter(category='men').order_by('-created_time')
 
     return render(request, 'men.html', {'media': media})
 
 def women(request):
     # Filter media items by category 'women'
-    media = UploadMedia.objects.filter(category='women')
+    media = UploadMedia.objects.filter(category='women').order_by('-created_time')
 
     return render(request, 'women.html', {'media': media})
 
@@ -239,6 +243,38 @@ def help(request):
 
 def feedback(request):
     return render(request, 'feedback')
+def user_list(request):
+    users = User.objects.all()
+    return render(request, 'user_list.html', {'users': users})
+
+def user_add(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('user_list')
+    else:
+        form = UserRegistrationForm()
+
+    return render(request, 'user_add.html', {'form': form})
+    
+
+def user_edit(request, pk):
+    user = get_object_or_404(CustomUser, pk=pk)
+
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user_list')  
+    else:
+        form = UserEditForm(instance=user)
+
+    return render(request, 'user_edit.html', {'form': form})
+
+def user_detail(request, pk):
+    user = User.objects.get(pk=pk)
+    return render(request, 'user_detail.html', {'user': user})
 
 
 

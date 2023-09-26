@@ -1,5 +1,172 @@
-<form method="GET" action="{% url 'media_search' %}">
-    {% csrf_token %}
-    <input type="text" name="query" placeholder="Search...">
-    <button type="submit">Search</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">   
+    <style>
+
+/* Style for the search form container */
+.search-form {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 180%;
+    margin-left: 100px; 
+}
+
+/* Style for the search input */
+.search-input {
+    padding: 10px;
+    border: 1px solid transparent;
+    border-radius: 25px;
+    font-size: 16px;
+    outline: none;
+    flex: 1; 
+}
+
+/* Style for the search button */
+.search-button {
+    background: none;
+    color: blue;
+    border: none;
+    border-radius: 50%;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+/* Style for the search button icon */
+.search-button i {
+    font-size: 20px;
+}
+
+/* Media query for large screens */
+@media (min-width: 1200px) {
+    .search-form {
+        width: 200%;
+    }
+}
+
+/* Media query for screens between 1024px and 1199px */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .search-form {
+        margin-left: 50%;
+        width: 180%;
+    }
+    .search-input {
+                display: block;
+            }
+
+}
+
+/* Media query for medium screens  */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .search-form {
+        margin-left: 50px;
+        width: 150%;
+    }
+    .search-input {
+                display: block;
+            }
+}
+
+/* Media query for small screens */
+@media (min-width: 360px) and (max-width: 540px) {
+    .search-form {
+        width: 120%;
+        margin-left: 0;
+    }
+
+    /* Show the button on small screens */
+    .search-button {
+        position: absolute;
+        top: 0; 
+        right: 0; 
+        z-index: 999;
+        font-size: 1.2rem;
+        padding: 12px;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+
+    /* this is to hide the input initially on small screens */
+    .search-input {
+        display: none;
+    }
+
+    /* this is to show the input when the button is clicked */
+    .search-form.open .search-input {
+        display: block;
+    }
+}
+/* Media query for small screens */
+@media (min-width: 541px) and (max-width: 768px) {
+    .search-form {
+        width: 120%;
+        margin-left: 0;
+    }
+
+    /* Show the button on small screens */
+    .search-button {
+        position: absolute;
+        top: 0; 
+        right: 0; 
+        z-index: 999;
+        font-size: 1.2rem;
+        padding: 12px;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+
+    /* this is to hide the input initially on small screens */
+    .search-input {
+        display: none;
+    }
+
+    /* this is to show the input when the button is clicked */
+    .search-form.open .search-input {
+        display: block;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <form method="GET" action="{% url 'media_search' %}" onsubmit="return validateSearchForm()">
+        {% csrf_token %}
+        <div class="search-form">
+            <input type="text" name="query" placeholder="Search..." class="search-input" id="search-input">
+            <button type="submit" class="search-button" id="search-toggle"><i class="fas fa-search"></i></button>
+        </div>
+    </form>
+    <script>
+        // JavaScript to toggle the input display on button click
+const searchForm = document.querySelector('.search-form');
+const searchInput = document.querySelector('.search-input');
+const searchToggle = document.querySelector('#search-toggle');
+
+searchToggle.addEventListener('click', () => {
+    searchForm.classList.toggle('open');
+    searchInput.style.display = 'block'; // Always display the input when the button is clicked
+    searchInput.focus();
+});
+
+// Function to validate the search form before submission
+function validateSearchForm() {
+    const query = searchInput.value.trim();
+    if (query === '') {
+        // Prevent form submission if the input is empty
+        return false;
+    }
+    return true;
+}
+
+    </script>
+</body>
+</html>

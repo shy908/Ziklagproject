@@ -6,16 +6,18 @@
     <link rel="stylesheet" href="{% static 'css/reset.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
 
     <div class="header">
         <div class="logo-container">
-            <i class="ri-menu-line" id="menu-icon"></i>
+            <div class="menu-icon">
+                <i class="ri-menu-line" id="menu-icon"></i>
+            </div>
             <div class="logo">
                 <div class="logo-img">
-                    <img src="static/img/icon/logo1.jpg" alt="">
                 </div>
                 <h1 id="logo-txt">Archive</h1>
             </div>
@@ -25,14 +27,14 @@
             <div class="profile-container">
                 <a href="{% url 'upload' %}" title="upload" class="upload"><i class="ri-video-upload-line" ></i></a>
                 <i class="ri-notification-4-line"></i>
-                <div class="profile-box">
+               
                 </div>
-            </div>
         </div>
         </div>
     </div>
 
-    <div class="body-container"> 
+    <div class="body-container">
+        <div class="sidebar-container" id="sidebar-container"> 
         <div class="sidebar active" id="sidebar">
             <div class="sidebar-items">
     <a href="{% url 'home' %}" title="Home" class="sidebar-item">
@@ -62,16 +64,20 @@
     <hr>
     <h4 class="Ministries">Ministries</h4>
     <a href="{% url 'men' %}" title="men" class="sidebar-item">
-        <i class="ri-men-line"></i> Men'sFellowship
+        <i class="ri-team-fill"></i> Men'sFellowship
     </a>
     <a href="{% url 'women' %}" title="women" class="sidebar-item">
-        <i class="ri-women-line"></i> Women'sFellowship
+        <i class="ri-team-line"></i>Women'sFellowship
     </a>
+    
     <a href="{% url 'youth' %}" title="youth" class="sidebar-item">
         <i class="ri-graduation-cap-line"></i> Youth
     </a>
     <a href="{% url 'younggeneration' %}" title="younggeneration" class="sidebar-item">
-        <i class="ri-chat-heart-line"></i> Young Generation
+        <i class="ri-chat-heart-line"></i> YoungGeneration
+    </a>
+    <a href="{% url 'user_list' %}" title="user" class="sidebar-item">
+        <i class="ri-user-follow-line"></i> Users
     </a>
     <hr>
     <h4 class="explore">Explore</h4>
@@ -115,7 +121,7 @@
         </a>
     {% endif %}
 </div>
-
+        </div>
     </div>
 
     <header>
@@ -133,16 +139,6 @@
             </div>
         </footer>
     </div>
-    <script>
-       document.addEventListener("DOMContentLoaded", function () {
-    const menuIcon = document.getElementById("menu-icon");
-    const sidebar = document.querySelector(".sidebar");
-
-    menuIcon.addEventListener("click", () => {
-        sidebar.classList.toggle("show-sidebar");
-    });
-});
-
-    </script>
-</body>
+    
+   </body>
 </html>

@@ -32,9 +32,12 @@ urlpatterns = [
     path('feedback/', feedback, name='feedback'),
     path('men/', men, name='men'),
     path('women/', women, name='women'),
-
-
-
+    path('users/', user_list, name='user_list'),
+    #path('user_profile/', user_profile, name='user_profile'),
+    path('users/<int:pk>/', views.user_detail, name='user_detail'),
+    path('users/add/', views.user_add, name='user_add'),
+    path('users/<int:pk>/edit/', views.user_edit, name='user_edit'),
+    #path('edit-profile/', views.edit_profile, name='edit_profile'),
 
 
 ]

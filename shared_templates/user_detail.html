@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>User Details</h1>
+    <p><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    
+    <!-- Checks if profile_picture field exists -->
+    {% if user.profile_picture %}
+        <img src="{{ user.profile_picture.url }}" alt="Profile Picture">
+    {% endif %}
+    
+    <p><strong>Phone Number:</strong> {{ user.phone_number }}</p>
+    <p><strong>Address:</strong> {{ user.address }}</p>
+    
+    <!-- Checks if social media profiles exist -->
+    {% if user.facebook_url %}
+        <p><strong>Facebook:</strong> <a href="{{ user.facebook_url }}" target="_blank">{{ user.facebook_url }}</a></p>
+    {% endif %}
+    
+    {% if user.twitter_url %}
+        <p><strong>Twitter:</strong> <a href="{{ user.twitter_url }}" target="_blank">{{ user.twitter_url }}</a></p>
+    {% endif %}
+    
+    {% if user.linkedin_url %}
+        <p><strong>LinkedIn:</strong> <a href="{{ user.linkedin_url }}" target="_blank">{{ user.linkedin_url }}</a></p>
+    {% endif %}
+    
+{% endblock %}

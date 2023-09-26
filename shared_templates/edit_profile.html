@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Edit Profile</h1>
+
+  <!-- Display the current profile picture -->
+  <a href="{% url 'user_profile' %}"><img src="/media/test-image.jpg"  class="avatar" alt="Avatar">
+  </a>
+  <!-- Form for updating the profile picture -->
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="profile_picture">
+    <button type="submit">Update Profile Picture</button>
+  </form>
+
+  {% if form.errors %}
+    <ul>
+      {% for field, errors in form.errors.items %}
+        <li>{{ field }}: {{ errors }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  
+  <!-- Add a button or link for taking a picture if needed -->
+{% endblock %}
