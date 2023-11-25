@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %} Archive | Home{% endblock %}
+
+{% block content %}
+<style>
+  .video-clips {
+      margin-top: 12px;
+      display: flex;
+      margin-left: 120px;
+      flex-wrap: wrap;
+  }
+
+  .video-wrapper, .image-wrapper {
+      background-color: inherit;
+      flex-basis: calc(33.33% - 20px); /* Distribute videos/images in 3 columns with spacing */
+      position: relative;
+  }
+  
+  video {
+      width: 100%; /* Ensure videos/images fit within their containers */
+      height: auto;
+      object-fit: cover;
+  }
+  
+</style>
+
+<div class="video-clips-wrapper">
+  <div class="video-clips">
+      {% for item in media %}
+          {% if item.category == 'newss' %}
+              {% if item.media_type == 'video' %}
+                  <div class="video-wrapper news-item">
+                      <video controls>
+                          <source src="{{ item.file }}" type="video/mp4">
+                      </video>
+                      <div class="media-info">
+                          <h4 class="video-title max-lines">{{ item.title }}</h4>
+                      </div>
+                  </div>
+              {% elif item.media_type == 'image' %}
+                  <div class="image-wrapper news-item">
+                      <a href="{{ item.file }}" target="_blank">
+                          <img class="image-item" src="{{ item.file }}" alt="{{ item.title }}">
+                          <span>{{ item.title }}</span>
+                      </a>
+                  </div>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+  </div>
+</div> 
+
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Script to control media playback -->
+<script>
+  $(document).ready(function() {
+      // Get all items with the "news-item" class
+      var newsItems = $('.news-item');
+
+      // Initialize an index to track which item to display
+      var currentIndex = 0;
+
+      // Function to display the next item
+      function showNextItem() {
+          // Hide all items
+          newsItems.hide();
+
+          // Show the next item
+          var currentItem = newsItems.eq(currentIndex);
+          currentItem.show();
+
+          // Check if it's a video and play it
+          if (currentItem.hasClass('video-wrapper')) {
+              var videoElement = currentItem.find('video')[0];
+              if (videoElement) {
+                  videoElement.muted = true;
+                  videoElement.play();
+              }
+          }
+
+          // Increment the index for the next item or reset to 0 if at the end
+          currentIndex = (currentIndex + 1) % newsItems.length;
+
+          // Delay the display of the next item (adjust the time as needed)
+          setTimeout(showNextItem, 8000); // 8000 milliseconds (8 seconds)
+      }
+
+      // Start displaying items
+      showNextItem();
+  });
+</script>
+{% endblock %}

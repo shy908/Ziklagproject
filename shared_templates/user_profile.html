@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<html>
+<body>
+    <h1>User Detail</h1>
+    
+    <table>
+        <tr>
+            <th>Field</th>
+            <th>Value</th>
+        </tr>
+        {% for field in user._meta.fields %}
+            <tr>
+                <td>{{ field.verbose_name }}</td>
+                <td>{{ user|getattr:field.name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+{% endblock %}

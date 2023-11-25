@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-container">
+            <div class="menu-icon">
+                <i class="ri-menu-line" id="menu-icon"></i>
+            </div>
+            <div class="logo">
+                <div class="logo-img">
+                </div>
+                <h1 id="logo-txt">Archive</h1>
+            </div>
+            <div class="search_form">
+                {% include 'search_form.html' %}
+            </div>
+            <div class="profile-container">
+                <a href="{% url 'upload' %}" title="upload" class="upload"><i class="ri-video-upload-line" ></i></a>
+                <i class="ri-notification-4-line"></i>
+               <!-- <a href="{% url 'user_profile' %}"><img src="/media/test-image.jpg"  class="avatar" alt="Avatar">
+            </a>-->
+                </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="body-container">
+        <div class="sidebar-container" id="sidebar-container"> 
+        <div class="sidebar active" id="sidebar">
+            <div class="sidebar-items">
+    <a href="{% url 'home' %}" title="Home" class="sidebar-item">
+        <i class="ri-home-4-line"></i> Home
+    </a>
+    <a href="{% url 'sermons' %}" title="sermons" class="sidebar-item">
+        <i class="ri-music-2-line"></i> Sermons
+    </a>
+    <a href="{% url 'songs' %}" title="songs" class="sidebar-item">
+        <i class="ri-music-2-line"></i> Songs
+    </a>
+
+    <a href="{% url 'clips' %}" title="clip" class="sidebar-item">
+        <i class="ri-video-line"></i> Clips
+    </a>
+    <hr>
+    <h4 class="events">What's happening in the Ark</h4>
+    <a href="{% url 'news' %}" title="news" class="sidebar-item">
+        <i class="ri-file-list-3-line"></i> News
+    </a>
+    <a href="{% url 'events' %}" title="events" class="sidebar-item">
+        <i class="ri-calendar-event-line"></i> Events
+    </a>
+    <a href="{% url 'testimonies' %}" title="testimonies" class="sidebar-item">
+        <i class="ri-folder-keyhole-line"></i> Testimonies
+    </a>
+    <hr>
+    <h4 class="Ministries">Ministries</h4>
+    <a href="{% url 'men' %}" title="men" class="sidebar-item">
+        <i class="ri-team-fill"></i> Men'sFellowship
+    </a>
+    <a href="{% url 'women' %}" title="women" class="sidebar-item">
+        <i class="ri-team-line"></i>Women'sFellowship
+    </a>
+    
+    <a href="{% url 'youth' %}" title="youth" class="sidebar-item">
+        <i class="ri-graduation-cap-line"></i> Youth
+    </a>
+    <a href="{% url 'younggeneration' %}" title="younggeneration" class="sidebar-item">
+        <i class="ri-chat-heart-line"></i> YoungGeneration
+    </a>
+    <a href="{% url 'user_list' %}" title="user" class="sidebar-item">
+        <i class="ri-user-follow-line"></i> Users
+    </a>
+    <hr>
+    <h4 class="explore">Explore</h4>
+    <a href="{% url 'resources' %}" title="resources" class="sidebar-item">
+        <i class="ri-bookmark-3-line"></i> Resources
+    </a>
+    <a href="{% url 'images' %}" title="images" class="sidebar-item">
+        <i class="ri-gallery-fill"></i> Gallery
+    </a>
+    <a href="{% url 'livestream' %}" title="livestream" class="sidebar-item">
+        <i class="ri-live-fill"></i> Live
+    </a>
+    <hr>
+    <a href="{% url 'settings' %}" title="settings" class="sidebar-item">
+        <i class="ri-settings-2-line"></i> Settings
+    </a>
+    <a href="{% url 'FAQs' %}" title="FAQs" class="sidebar-item">
+        <i class="ri-file-info-line"></i> FAQs
+    </a>
+    <a href="{% url 'media_policy' %}" title="media_policy" class="sidebar-item">
+        <i class="ri-lock-2-line"></i> Policy
+    </a>
+    <hr>
+    <a href="{% url 'contact' %}" title="contact" class="sidebar-item">
+        <i class="ri-contacts-line"></i> Contact
+    </a>
+    <a href="{% url 'help' %}" title="help" class="sidebar-item">
+        <i class="ri-question-line"></i> Help
+    </a>
+    <a href="{% url 'feedback' %}" title="feedback" class="sidebar-item">
+        <i class="ri-feedback-line"></i> Feedback
+    </a>
+    {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}" title="Login" class="sidebar-item">
+            <i class="ri-login-box-line"></i> Login
+        </a>
+        <a href="{% url 'signup' %}" title="Sign Up" class="sidebar-item">Sign Up</a>
+    {% else %}
+        <a href="{% url 'logout' %}" title="Logout" class="sidebar-item">
+            <i class="ri-logout-box-line"></i> Logout
+        </a>
+    {% endif %}
+</div>
+        </div>
+    </div>
+
+    <header>
+        <!-- Header content here -->
+    </header>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+    <div class="bottom-section">
+        <footer>
+               <!-- &copy; {{ current_year }} My Website -->
+              
+                <span></span>
+            </div>
+        </footer>
+    </div>
+    
+   </body>
+</html>

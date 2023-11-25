@@ -1,30 +1,214 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 
 {% block content %}
 
+<div class="container">
+    <div class="row">
+        <!-- User Profile Section -->
+        <div class="col-md-4">
+            <div class="d-flex flex-column align-items-center">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-image">
+                {% else %}
+                    <img src="/media/test-image.jpg" alt="Default Profile Picture" class="profile-image">
+                {% endif %}
+                <div class="name text-center mt-3">
+                    <h3 class="user-name">{{ user.first_name }} {{ user.last_name }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="update-profile">
+            <i class="ri-pencil-fill"></i><a href="{% url 'upload_profile_picture' %}" class="update-pro" title="update-profile">Edit Profile</a>
+        </div>
+    </div>
 
-<div class="center">
-	<form method="POST" enctype="multipart/form-data" class="card">
-		{% csrf_token %} 
-		
-	    {% if user.profile %}
-			<img src="{{user.profile.avatar.url}}" alt="{{ user.username }}" class="avatar"  accept=".jpg,.jpeg,.png"/>
-	    {% endif %}
-	    
-	    <h2 class="text-center">{{ user.username | title }}</h2>
-	    <p class="text-center"><a href="mailto:{{user.email}}">{{user.email}}</a></p>
-   	    <hr>
-		
-            <label for="email">Email Address:</label>
-            <input type="email" id="email" name="email" value="{{user.email}}" />
-			
-		
-		<label for="avatar">Avatar:</label>
-		<input type="file" name="avatar" id="avatar">	
-		
-	    <button type="submit" class="btn btn-primary full-width">Update Profile</button>
-	
-	</form>
+    <!-- Media Categories Tab Buttons -->
+    <div class="tab-buttons">
+        <div class="tab-button" onclick="showCategory('about')" data-category="about">About</div>
+        <div class="tab-button" onclick="showCategory('videos')" data-category="videos">Videos</div>
+        <div class="tab-button" onclick="showCategory('audios')" data-category="audios">Audios</div>
+        <div class="tab-button" onclick="showCategory('images')" data-category="images">Images</div>
+        <div class="tab-button" onclick="showCategory('files')" data-category="files">Files</div>
+
+    </div>
+
+    <!-- Media Category Sections -->
+    <div id="about" class="tab-content">
+        <!-- About content -->
+        <div class="profile-info">
+            <h4 class="heading">Basic info</h4>
+            <p class="bio"><i class="ri-lightbulb-line"></i>{{ user.bio }}</p><span class="label">Bio</span>
+            <p><i class="ri-user-fill"></i>{{ user.get_gender_display }}</p><span class="label">Gender</span>
+            <p><i class="ri-heart-fill"></i>{{ user.interests }}</p><span class="label">Interests</span>
+            <p><i class="ri-calendar-todo-fill"></i>{{ user.birth_date }}</p><span class="label">Birthday</span>
+            <p><i class="ri-calendar-todo-fill"></i>{{ user.date_joined }}</p><span class="label">Date joined</span>
+            <h4 class="heading">Contact info</h4>
+            <p><i class="ri-phone-line"></i><span class="phone-number">{{ user.phone_number }}</span></p>
+            <span class="label">Mobile</span>
+            <p><i class="ri-mail-fill"></i> {{ user.email }}</p><span class ="label">Email</span>
+            <br>
+            <div class="update-prof">
+                <a href="{% url 'user_edit' pk=user.id %}" class="user-link" title="Edit User Profile">Edit</a>
+            </div>
+            <h4 class="heading">Places Lived</h4>
+            <p><i class="ri-community-fill"></i> {{ user.address }}</p><span class="label">Address</span>
+        </div>
+        <h4 class="heading">Social Presence</h4>
+        <div class="social-links">
+            <ul>
+                {% if user.facebook_url %}
+                    <li><i class="ri-facebook-circle-fill"></i><a href="{{ user.facebook_url }}" target="_blank">Facebook</a></li>
+                {% else %}
+                    <li><i class="ri-facebook-circle-fill"></i><a href="{% url 'user_edit' pk=user.id %}" target="_blank">Add your Facebook link</a></li>
+                {% endif %}
+        
+                {% if user.twitter_url %}
+                    <li><i class="ri-twitter-x-line"></i><a href="{{ user.twitter_url }}" target="_blank">Twitter</a></li>
+                {% else %}
+                    <li><i class="ri-twitter-x-line"></i><a href="{% url 'user_edit' pk=user.id %}" target="_blank">Add your Twitter link</a></li>
+                {% endif %}
+        
+                {% if user.linkedin_url %}
+                    <li><i class="ri-linkedin-box-fill"></i><a href="{{ user.linkedin_url }}" target="_blank">LinkedIn</a></li>
+                {% else %}
+                    <li><i class="ri-linkedin-box-fill"></i><a href="{% url 'user_edit' pk=user.id %}" target="_blank">Add your LinkedIn link</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <a href="{% url 'user_edit' pk=user.id %}" class="user-link" target="_blank">Edit your details</a></li>
+    </div>
+
+    <div id="videos" class="tab-content">
+        <!-- Videos content -->
+        <div class="video-clips-wrapper">
+            <div class="media-title">
+                <h2>Videos</h2>
+            </div>
+            <div class="video-clips">
+                {% for item in media %}
+                    {% if item.media_type == 'video' %}
+                        <div class="video-wrapper">
+                            <!-- Video content -->
+                            <div class="media">
+                                <div class="media-info">
+                                    <h4 class="video-title max-lines">{{ item.title }}</h4>
+                                    <p class="uploaded-info">{{ item.uploaded_by }}</p>
+                                    <p class="uploaded-info">{{ item.created_time|date:"F d, Y H:i:s" }}</p>
+                                </div>
+                            </div>
+                            <div class="video-thumbnail">
+                                <video controls>
+                                    <source src="{{ item.file }}" type="video/mp4">
+                                </video>
+                            </div>
+                            <div class="video-actions">
+                                <!-- Like button -->
+                                <span class="actions"><i class="ri-thumb-up-line"></i><button class="like-button">Like</button></span>
+                                <!-- Message button -->
+                                <span class="actions"><i class="ri-chat-1-line"></i><button class="message-button">Comment</button></span>
+                                <!-- Share button -->
+                                <span class="actions"><i class="ri-share-forward-fill"></i><button class="share-button">Share</button></span>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Audios Tab Content -->
+<div id="audios" class="tab-content">
+    <div class="audio-clips">
+        <div class="media-title">
+            <h2>Audios</h2>
+        </div>
+        <!-- Audio display loop -->
+        {% for item in media %}
+            {% if item.media_type == 'audio'%}
+            <div class="audio-wrapper">
+                <div class="audio-header" onclick="toggleAudioPlaylist(this)">
+                    <i class="fas fa-music"></i>
+                    <span>{{ item.title }}</span>
+                </div>
+                <div class="audio-playlist" style="display: none;">
+                    <audio controls>
+                        <source src="{{ item.file }}" type="audio/mp3">
+                    </audio>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
 </div>
 
-{% endblock content %}
+       <!-- Images Tab Content -->
+        <div id="images" class="tab-content">
+            <div class="images-wrapper">
+                <div class="media-title">
+                    <h2>Images</h2>
+                </div>
+                <div class="images">
+                    <!-- Image display loop -->
+                    {% for item in media %}
+                        {% if item.media_type == 'image'%}
+                        <div class="image-wrapper">
+                            <span>{{ item.title }}</span>
+                            <a href="{{ item.file }}" target="_self">
+                                <img src="{{ item.file }}" alt="{{ item.title }}">
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    <!-- Files Tab Content -->
+    <div id="files" class="tab-content">
+        <div class="files">
+            <div class="media-title">
+                <h2>Files</h2>
+            </div>
+            <!-- File display loop -->
+            {% for item in media %}
+                {% if item.media_type == 'file' %}
+                <div class="file-wrapper">
+                    <span>{{ item.title }}</span>
+                    <a href="{{ item.file }}" target="_self" download="{{ item.title }}">
+                        <svg class="file-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+                            <line x1="12" y1="2" x2="12" y2="9" />
+                            <polyline points="10 9 12 7 14 9" />
+                        </svg>
+                    </a>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+<script>
+    // JavaScript function to show the selected category
+    function showCategory(categoryName) {
+        var i;
+        var tabContent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabContent.length; i++) {
+            tabContent[i].style.display = "none";
+        }
+        document.getElementById(categoryName).style.display = "block";
+
+        // Add the active-tab-button class to the currently active tab button
+        var tabButtons = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active-tab-button");
+        }
+        var activeTabButton = document.querySelector(".tab-button[data-category='" + categoryName + "']");
+        if (activeTabButton) {
+            activeTabButton.classList.add("active-tab-button");
+        }
+    }
+
+    // Show the default category (e.g., About) when the page loads
+    showCategory('about');
+</script>
+
+{% endblock %}

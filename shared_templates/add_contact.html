@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Archive | User Edit {% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="form-content">
+        <h1>Edit User</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p}}
+            <div class="form-submit">
+                <button type="submit">Save</button>
+            </div>
+        </form>
+        {% if form.errors %}
+<div class="alert alert-danger">
+    <strong>Error!</strong> Please correct the following errors:
+    <ul>
+        {% for error in form.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+    </div>
+</div>
+{% endblock %}

@@ -4,10 +4,12 @@
   <h1>Edit Profile</h1>
 
   <!-- Display the current profile picture -->
-  <a href="{% url 'user_profile' %}"><img src="/media/test-image.jpg"  class="avatar" alt="Avatar">
+  <a href="{% url 'user_profile' %}">
+    <img src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}/media/test-image.jpg{% endif %}" class="avatar" alt="Avatar">
   </a>
+
   <!-- Form for updating the profile picture -->
-<form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="file" name="profile_picture">
     <button type="submit">Update Profile Picture</button>
@@ -20,6 +22,11 @@
       {% endfor %}
     </ul>
   {% endif %}
-  
-  <!-- Add a button or link for taking a picture if needed -->
+
+  <!-- Form for editing user information -->
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Changes</button>
+  </form>
 {% endblock %}

@@ -56,27 +56,14 @@
         </div>
     </form>
     <script>
-        // JavaScript to toggle the input display on button click
-const searchForm = document.querySelector('.search-form');
-const searchInput = document.querySelector('.search-input');
-const searchToggle = document.querySelector('#search-toggle');
-
-searchToggle.addEventListener('click', () => {
-    searchForm.classList.toggle('open');
-    searchInput.style.display = 'block'; // Always display the input when the button is clicked
-    searchInput.focus();
-});
-
-// Function to validate the search form before submission
-function validateSearchForm() {
-    const query = searchInput.value.trim();
-    if (query === '') {
-        // Prevent form submission if the input is empty
-        return false;
-    }
-    return true;
-}
-
-    </script>
+        function validateSearchForm() {
+            var searchInput = document.getElementById('search-input').value.trim();
+            if (searchInput === "") {
+                return false; 
+            }
+            return true; 
+        }
+        </script>
+        
 </body>
 </html>

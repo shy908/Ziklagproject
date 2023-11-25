@@ -1,45 +1,33 @@
 {% extends 'base.html' %}
 
-{% block title %}User List{% endblock %}
+{% block title %}Users List{% endblock %}
 
 {% block content %}
 <div class="content">
-  <h1>User List</h1>
+  <h1>Users</h1>
 
   <div class="add-user-wrapper">
     <a href="{% url 'user_add' %}" title="Add User" class="add-user-link">Add User</a>
   </div>
   <div class="user-list">
-    <div class="user-header">
-      <div>First Name</div>
-      <div>Last Name</div>
-      <div>Email</div>
-      <div>Is Active</div>
-      <div>Actions</div>
-    </div>
     {% for user in users %}
-    <div class="user">
-      <div>{{ user.first_name }}</div>
-      <div>{{ user.last_name }}</div>
-      <div><a href="mailto:{{ user.email }}">{{ user.email }}</a></div>
-      <div>{{ user.is_active }}</div>  
-      <div>
-        <a href="{% url 'user_detail' pk=user.id %}" class="user-link" title="View User Profile">View</a>
-        <a href="{% url 'user_edit' pk=user.id %}" class="user-link" title="Edit User Profile">Edit</a>
+      <div class="user">
+        <a href="{% url 'profile' user.id %}" class="user-info">
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-image-u">
+          {% else %}
+            <img src="/media/test-image.jpg" alt="Default Profile Picture" class="profile-image-u">
+          {% endif %}
+          <div class="user-name">
+            <span><strong>{{ user.first_name }} {{ user.last_name }}</strong></span>
+          </div>
+          <div class="user-actions">
+            <a href="{% url 'profile' user.id %}" class="user-link" title="View User Profile">View</a>
+          </div>
+        </a>
       </div>
-    </div>
     {% endfor %}
   </div>
 
-  <style>
-    .add-user-wrapper {
-      display: inline-block;
-      background-color: green;
-      padding: 5px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
-
-  </style>
 </div>
 {% endblock %}
