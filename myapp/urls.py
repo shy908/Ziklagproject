@@ -32,12 +32,18 @@ urlpatterns = [
     path('feedback/', feedback, name='feedback'),
     path('men/', men, name='men'),
     path('women/', women, name='women'),
+    path('autocomplete_media/', autocomplete_media, name='autocomplete_media'),
     path('users/', user_list, name='user_list'),
-    #path('user_profile/', user_profile, name='user_profile'),
     path('users/<int:pk>/', views.user_detail, name='user_detail'),
     path('users/add/', views.user_add, name='user_add'),
     path('users/<int:pk>/edit/', views.user_edit, name='user_edit'),
-    #path('edit-profile/', views.edit_profile, name='edit_profile'),
+    path('profile/<int:user_id>/', views.profile, name='profile'),
+    #path('view_profile/<str:username>/', views.other_profile, name='other_profile'),
+    path('upload_profile_picture/', upload_profile_picture, name='upload_profile_picture'),
+    path('about_user/', about_user, name='about_user'),
+
+
+
 
 
 ]

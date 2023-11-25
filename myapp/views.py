@@ -12,6 +12,7 @@ from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.urls import reverse
 from django.conf import settings
 import os
+from datetime import datetime
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
@@ -20,24 +21,29 @@ from django.dispatch import receiver
 from itertools import chain
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import UploadMedia, CustomUser
-from .forms import UploadMediaForm, SearchForm,  SignupForm, UserRegistrationForm, UserEditForm
-
+from .forms import UploadMediaForm, SearchForm,  SignupForm, UserRegistrationForm, UserEditForm, UserProfileForm
 
 def home(request):
-    query = request.GET.get('query') 
+    query = request.GET.get('query')
 
-    # Filter media by category 'news' and order by created_time
+    # Fetch the latest sermon
+    latest_sermon = UploadMedia.objects.filter(category='sermon').order_by('-created_time').first()
+
+    # Fetch the latest news
     if query:
-        media = UploadMedia.objects.filter(
+        latest_news = UploadMedia.objects.filter(
             Q(title__icontains=query) |
             Q(description__icontains=query),
             category='news'  # Filter by the 'news' category
-        ).order_by('-created_time')[:3]  # Limit to the last three news items
+        ).order_by('-created_time').first()
     else:
-        media = UploadMedia.objects.filter(category='news').order_by('-created_time')[:3]
+        latest_news = UploadMedia.objects.filter(category='news').order_by('-created_time').first()
 
-    return render(request, 'home.html', {'media': media, 'query': query})
-
+    return render(request, 'home.html', {
+        'latest_news': latest_news,
+        'latest_sermon': latest_sermon,
+        'query': query
+    })
 
 def signup(request):
     if request.method == "POST":
@@ -81,7 +87,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('signup')
+    return redirect('login')
 
 def upload(request):
     if request.method == "POST":
@@ -113,20 +119,14 @@ def upload(request):
     media_files = UploadMedia.objects.all().order_by('-id')
 
     return render(request, 'upload.html', {'media_files': media_files})
-
-def delete_media(request, media_id):
-    media = get_object_or_404(UploadMedia, id=media_id)
-
-    # Delete the media file from the file storage system
-    if media.file:
-        file_path = os.path.join(settings.MEDIA_ROOT, str(media.file))
-        if os.path.exists(file_path):
-            os.remove(file_path)
-    # Delete the media object from the database
-    media.delete()
-
-    return redirect('upload')  # Redirect to the media search page after deletion
     
+def delete_media(request, media_id):
+    try:
+        media_item = UploadMedia.objects.get(pk=media_id)
+        media_item.delete()
+    except UploadMedia.DoesNotExist:
+        pass
+    return redirect('upload')
 
 def edit_media(request, media_id):
     media = get_object_or_404(UploadMedia, id=media_id)
@@ -135,13 +135,20 @@ def edit_media(request, media_id):
         form = UploadMediaForm(request.POST, instance=media)
         if form.is_valid():
             form.save()
-            return redirect('upload')  # Redirect to the media search page after editing
+            return redirect('upload') 
     else:
         form = UploadMediaForm(instance=media, initial={'category': media.category})
 
     return render(request, 'edit_media.html', {'form': form, 'media': media})
 
 User = get_user_model()
+
+def autocomplete_media(request):
+    if request.is_ajax():
+        query = request.GET.get('term', '')
+        results = UploadMedia.objects.filter(Q(title__icontains=query))
+        data = [{'id': media.id, 'value': media.title} for media in results]
+        return JsonResponse(data, safe=False)
 
 def media_search(request):
     form = SearchForm(request.GET)
@@ -150,7 +157,6 @@ def media_search(request):
     if form.is_valid():
         query = form.cleaned_data['query']
         results = UploadMedia.objects.filter(title__icontains=query)
-        print(results) 
 
     return render(request, 'media_search.html', {'form': form, 'results': results})
 
@@ -243,6 +249,17 @@ def help(request):
 
 def feedback(request):
     return render(request, 'feedback')
+
+
+def about_user(request):
+    media = UploadMedia.objects.order_by('-created_time')
+    return render(request, 'about_user.html', {'media': media})
+
+def profile(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    media = UploadMedia.objects.filter(uploaded_by=user).order_by('-created_time')
+    return render(request, 'profile.html', {'media': media, 'user': user})
+
 def user_list(request):
     users = User.objects.all()
     return render(request, 'user_list.html', {'users': users})
@@ -257,7 +274,7 @@ def user_add(request):
         form = UserRegistrationForm()
 
     return render(request, 'user_add.html', {'form': form})
-    
+
 
 def user_edit(request, pk):
     user = get_object_or_404(CustomUser, pk=pk)
@@ -266,7 +283,7 @@ def user_edit(request, pk):
         form = UserEditForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect('user_list')  
+            return redirect('profile')  
     else:
         form = UserEditForm(instance=user)
 
@@ -276,5 +293,15 @@ def user_detail(request, pk):
     user = User.objects.get(pk=pk)
     return render(request, 'user_detail.html', {'user': user})
 
+@login_required
+def upload_profile_picture(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = UserProfileForm(instance=request.user)
 
-
+    return render(request, 'upload_profile_picture.html', {'form': form})
+    

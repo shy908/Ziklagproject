@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from myapp.models import CustomUser
 from django.contrib.auth.forms import UserCreationForm
 from .models import UploadMedia
+from datetime import datetime
+from django.forms.models import inlineformset_factory
 
 class UploadMediaForm(forms.ModelForm):
     class Meta:
@@ -12,7 +14,7 @@ class UploadMediaForm(forms.ModelForm):
 class SignupForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ['email', 'password1', 'password2']
+        fields = ['first_name', 'email', 'password1', 'password2']
 
 class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(
@@ -44,16 +46,26 @@ class UserRegistrationForm(forms.ModelForm):
             user.save()
         return user
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+    
+
 class UserEditForm(forms.ModelForm):
+    birth_date = forms.DateField(widget=DateInput)
+    
     class Meta:
         model = CustomUser
         fields = [
             'email',
             'first_name',
             'last_name',
-            'profile_picture',
+            'gender',
+            'birth_date',
             'phone_number',
             'address',
+            'bio',
+            'interests',
+            'date_joined',  
             'facebook_url',
             'twitter_url',
             'linkedin_url',
@@ -61,3 +73,8 @@ class UserEditForm(forms.ModelForm):
         
 class SearchForm(forms.Form):
     query = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Search...'}))
+            
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['profile_picture']

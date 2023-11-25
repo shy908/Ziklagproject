@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from datetime import datetime
 
 # Function to specify the upload path for media files
 def media_upload_path(instance, filename):
@@ -22,6 +23,7 @@ class UploadMedia(models.Model):
     media_type = models.CharField(max_length=10, choices=MEDIA_CHOICES, default='file')
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=1)
     created_time = models.DateTimeField(default=timezone.now)
+
 
     CATEGORY_CHOICES = (
         ('sermon', 'Sermon'),
@@ -46,16 +48,16 @@ class UploadMedia(models.Model):
 
 # Custom user manager for the CustomUser model
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, username, password=None, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, username=username, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email, username, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -64,23 +66,35 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
 
-        return self.create_user(email, password, **extra_fields)
-
+        return self.create_user(email, username, password, **extra_fields)
 # Custom user model extending AbstractBaseUser and PermissionsMixin
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
+    username = models.CharField(max_length=30, unique=True, null=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
+
+    def save(self, *args, **kwargs):
+        self.first_name = self.first_name.capitalize()
+        self.last_name = self.last_name.capitalize()
+        super(CustomUser, self).save(*args, **kwargs)
+        
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
 
- # Profile picture
+    birth_date = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=[("male", "Male"), ("female", "Female")], null=True, blank=True)
+    bio = models.TextField(null=True, blank=True)
+    interests = models.TextField(null=True, blank=True)
+
+
+    # Profile picture
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
 
     # Contact information
-    phone_number = models.CharField(max_length=15, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
 
     # Social media profiles
     facebook_url = models.URLField(null=True, blank=True)
@@ -90,11 +104,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username"]
 
-    def __str__(self):
-        return self.email
-    
+
     class Meta:
         verbose_name = 'Custom User'
         verbose_name_plural = 'Custom Users'
