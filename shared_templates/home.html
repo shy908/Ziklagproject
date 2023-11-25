@@ -4,92 +4,110 @@
 
 {% block content %}
 <style>
-  .video-clips {
-      margin-top: 12px;
-      display: flex;
-      margin-left: 120px;
-      flex-wrap: wrap;
-  }
+.media-btn {
+        text-align: end;
+        margin-top: 0; 
+    }
 
-  .video-wrapper, .image-wrapper {
-      background-color: inherit;
-      flex-basis: calc(33.33% - 20px); /* Distribute videos/images in 3 columns with spacing */
-      position: relative;
-  }
-  
-  video {
-      width: 100%; /* Ensure videos/images fit within their containers */
-      height: auto;
-      object-fit: cover;
-  }
-  
+    .btn-learn-more {
+        text-decoration: none;
+        border-radius: 5px;
+        color: #dd3333;
+        transition: background-color 0.3s ease, opacity 0.3s ease; /* Added opacity transition */
+        opacity: 1; /* Initially set opacity to fully visible */
+        animation: pulsate 2s ease-in-out infinite alternate; /* Pulsating animation */
+    }
+
+    .btn-learn-more:hover {
+        background-color: #4caf50;
+        color: #ffffff;
+        opacity: 0.8; /* Set opacity to slightly lower value on hover */
+        animation: none; /* Disable pulsating animation on hover */
+    }
+
+    @keyframes pulsate {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0.6;
+        }
+    }
+
 </style>
 
-<div class="video-clips-wrapper">
-  <div class="video-clips">
-      {% for item in media %}
-          {% if item.category == 'news' %}
-              {% if item.media_type == 'video' %}
-                  <div class="video-wrapper news-item">
-                      <video controls>
-                          <source src="{{ item.file }}" type="video/mp4">
-                      </video>
-                      <div class="media-info">
-                          <h4 class="video-title max-lines">{{ item.title }}</h4>
-                      </div>
-                  </div>
-              {% elif item.media_type == 'image' %}
-                  <div class="image-wrapper news-item">
-                      <a href="{{ item.file }}" target="_blank">
-                          <img class="image-item" src="{{ item.file }}" alt="{{ item.title }}">
-                          <span>{{ item.title }}</span>
-                      </a>
-                  </div>
-              {% endif %}
-          {% endif %}
-      {% endfor %}
-  </div>
-</div> 
+<div class="content">
+    <h3>Announcements and Updates</h3>
+    
+    <!-- Displays Latest News -->
+    {% if latest_news %}
+        <div class="latest-news">
+            {% if latest_news.media_type == 'video' %}
+                <video controls>
+                    <source src="{{ latest_news.file }}" type="video/mp4">
+                </video>
+            {% elif latest_news.media_type == 'image' %}
+                <a href="{% url 'news' %}">
+                    <img class="image-item" src="{{ latest_news.file }}" alt="{{ latest_news.title }}">
+                </a>
+            {% endif %}
+            <div class="media-btn">
+                <p class="learn-more">
+                    <a href="{% url 'news' %}" class="btn-learn-more">Learn More</a>
+                </p>
+            </div>
+        </div>
+    {% endif %}
 
-<!-- Include jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!--  navigation dots at the bottom -->
+        <div style="text-align:center">
+            {% for item in media %}
+                {% if item.category == 'news' %}
+                    <span class="dot"></span>
+                {% endif %}
+            {% endfor %}
+        </div>
 
-<!-- Script to control media playback -->
-<script>
-  $(document).ready(function() {
-      // Get all items with the "news-item" class
-      var newsItems = $('.news-item');
+    <!-- Display Latest Sermon Separately -->
+    {% if latest_sermon %}
+    <h2>Latest sermon</h2>
+    <div class="video-wrapper">
+        <div class="media">
+            <div class="user-profile">
+                {% if latest_sermon.uploaded_by.profile_picture %}
+                    <img src="{{ latest_sermon.uploaded_by.profile_picture.url }}" alt="Profile Picture" class="profile-image">
+                {% else %}
+                    <img src="/media/test-image.jpg" alt="Default Profile Picture" class="profile-image">
+                {% endif %}
+            </div>
+            <div class="media-info">
+                <h4 class="video-title max-lines">{{ latest_sermon.title }}</h4>
+                <p class="uploaded-info">{{ latest_sermon.uploaded_by }}</p>
+                <p class="uploaded-info">{{ latest_sermon.created_time|date:"F d, Y H:i:s" }}</p>
+            </div>
+        </div>
+        <div class="video-thumbnail">
+            <video controls>
+                <source src="{{ latest_sermon.file }}" type="video/mp4">
+            </video>
+        </div>
+        <div class="video-actions">
+            <!-- Like button -->
+            <span class="actions"><i class="ri-thumb-up-line"></i><button class="like-button">Like</button></span>
+            <!-- Message button -->
+            <span class="actions"><i class="ri-chat-1-line"></i><button class="message-button">Comment</button></span>
+            <!-- Share button -->
+            <span class="actions"><i class="ri-share-forward-fill"></i><button class="share-button">Share</button></span>
+        </div>
+        <div class="media-btn">
+            <p class="learn-more">
+                <a href="{% url 'news' %}" class="btn-learn-more">Go to sermons</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+</div>
 
-      // Initialize an index to track which item to display
-      var currentIndex = 0;
 
-      // Function to display the next item
-      function showNextItem() {
-          // Hide all items
-          newsItems.hide();
-
-          // Show the next item
-          var currentItem = newsItems.eq(currentIndex);
-          currentItem.show();
-
-          // Check if it's a video and play it
-          if (currentItem.hasClass('video-wrapper')) {
-              var videoElement = currentItem.find('video')[0];
-              if (videoElement) {
-                  videoElement.muted = true;
-                  videoElement.play();
-              }
-          }
-
-          // Increment the index for the next item or reset to 0 if at the end
-          currentIndex = (currentIndex + 1) % newsItems.length;
-
-          // Delay the display of the next item (adjust the time as needed)
-          setTimeout(showNextItem, 8000); // 8000 milliseconds (8 seconds)
-      }
-
-      // Start displaying items
-      showNextItem();
-  });
-</script>
 {% endblock %}
